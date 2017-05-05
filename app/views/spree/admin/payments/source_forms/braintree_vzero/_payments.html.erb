@@ -33,15 +33,15 @@
       <br/>
       <%= label_tag 'card_number_label', payment_method.preferred_number_placeholder %>
       <span class="required">*</span><br />
-      <p id="hosted-fields-number" class="form-control"></p>
+      <p id="hosted-fields-number-<%= payment_method.id %>" class="form-control"></p>
 
       <%= label_tag 'cvv_label', payment_method.preferred_cvv_placeholder %>
       <span class="required">*</span><br />
-      <p id="hosted-fields-cvv" class="form-control"></p>
+      <p id="hosted-fields-cvv-<%= payment_method.id %>" class="form-control"></p>
 
       <%= label_tag 'expiration_date_label', payment_method.preferred_expiration_date_placeholder %>
       <span class="required">*</span><br />
-      <p id="hosted-fields-expiration-date" class="form-control"></p>
+      <p id="hosted-fields-expiration-date-<%= payment_method.id %>" class="form-control"></p>
       <br/>
     <% elsif dropin %>
       <br/>
@@ -60,29 +60,45 @@
 
 <script type="text/javascript">
   $('#payment_payment_method_id_<%= payment_method.id %>').click(function (e) {
-    var checkoutFormId = "new_payment";
+		if (SpreeBraintreeVzero.currentInstance) {
+			SpreeBraintreeVzero.currentInstance.teardown(setup);
+		} else {
+			setup();
+		}
 
-    SpreeBraintreeVzero.advancedFraudTools = false;
-    SpreeBraintreeVzero.paymentMethodID = "<%= payment_method.id %>";
-    SpreeBraintreeVzero.checkoutFormId = "#" + checkoutFormId;
-    SpreeBraintreeVzero.threeDSecure = false;
-    SpreeBraintreeVzero.paypal = <%= paypal %>;
-    SpreeBraintreeVzero.admin = true;
-    SpreeBraintreeVzero.paypal_empty = <%= !display_payment_methods_list %>
+		function setup() {
+			var checkoutFormId = "new_payment";
 
-    var clientToken = "<%= payment_method.client_token(@order) %>";
-    var errorMessagesContainer = "col-md-12";
+			SpreeBraintreeVzero.advancedFraudTools = false;
+			SpreeBraintreeVzero.paymentMethodID = "<%= payment_method.id %>";
+			SpreeBraintreeVzero.checkoutFormId = "#" + checkoutFormId;
+			SpreeBraintreeVzero.threeDSecure = false;
+			SpreeBraintreeVzero.paypal = <%= paypal %>;
+			SpreeBraintreeVzero.admin = true;
+			SpreeBraintreeVzero.paypal_empty = <%= !display_payment_methods_list %>
 
-    <% if dropin %>
-      var container = "payment-form";
-      $('#' + container).empty();
-    <% end %>
-    var checkout;
+			var clientToken = "<%= payment_method.client_token(@order) %>";
+			var errorMessagesContainer = "col-md-12";
 
-    braintree.setup(clientToken, '<%= payment_method_type %>', {
-      <%= render(partial: 'spree/shared/braintree_vzero/dropin', locals: { shipping_address: shipping_address, payment_method: payment_method }, formats: [:js]) if dropin %>
-      <%= render(partial: 'spree/shared/braintree_vzero/hosted', locals: { payment_method: payment_method }, formats: [:js]) if hosted %>
-    });
+			<% if dropin %>
+				var container = "payment-form";
+				$('#' + container).empty();
+			<% end %>
+			var checkout;
+			var options = {
+				<%= render(partial: 'spree/shared/braintree_vzero/dropin', locals: { shipping_address: shipping_address, payment_method: payment_method }, formats: [:js]) if dropin %>
+				<%= render(partial: 'spree/shared/braintree_vzero/hosted', locals: { payment_method: payment_method }, formats: [:js]) if hosted %>
+			};
+
+			options.hostedFields.number.selector = "#hosted-fields-number-<%= payment_method.id %>";
+			options.hostedFields.cvv.selector = "#hosted-fields-cvv-<%= payment_method.id %>";
+			options.hostedFields.expirationDate.selector = "#hosted-fields-expiration-date-<%= payment_method.id %>";
+			options.onReady = function(integration) {
+				SpreeBraintreeVzero.currentInstance = integration;
+			};
+
+			braintree.setup(clientToken, '<%= payment_method_type %>', options);
+		}
   });
 </script>
 
