@@ -4,7 +4,7 @@ Deface::Override.new(
   replace: 'erb[silent]:contains("else")',
   text: %Q{
         <% elsif payment.payment_method.kind_of?(Spree::Gateway::BraintreeVzeroBase) %>
-          <% if (last_digits = payment.source.braintree_last_digits) %>
+          <% if (last_digits = payment.source.try(:braintree_last_digits)) %>
             <%
               cc_type = payment.source.braintree_card_type
               img = "credit_cards/icons/" + cc_type.downcase + ".png"
