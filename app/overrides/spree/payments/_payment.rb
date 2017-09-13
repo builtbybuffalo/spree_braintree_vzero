@@ -18,7 +18,7 @@ Deface::Override.new(
             <p><%= Spree.t(:ending_in) + " " + last_digits %></p>
           <% end %>
 
-          <% if (paypal_email = payment.source.paypal_email) %>
+          <% if (paypal_email = payment.source.try(:paypal_email)) %>
             <!-- PayPal Logo --><img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_37x23.jpg" border="0" alt="PayPal Logo"><!-- PayPal Logo -->
             <%= paypal_email %>
           <% end %>
