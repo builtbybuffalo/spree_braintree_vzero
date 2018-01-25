@@ -1,5 +1,5 @@
 Braintree::SuccessfulResult.class_eval do
-  attr_reader :authorization
+  attr_reader :authorization, :message
 
   def authorization
     transaction.id
@@ -10,6 +10,6 @@ Braintree::SuccessfulResult.class_eval do
   end
 
   def cvv_result
-    { code: transaction.cvv_response_code, message: nil }
+    {code: transaction.cvv_response_code, message: nil}.with_indifferent_access
   end
 end
