@@ -52,7 +52,6 @@ module Spree
             country_code_alpha2: country.iso,
             country_code_alpha3: country.iso3,
             country_code_numeric: country.numcode,
-            country_name: country.name,
             first_name: address.first_name,
             last_name: address.last_name,
             locality: address.city,
